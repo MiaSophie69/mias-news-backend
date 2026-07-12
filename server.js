@@ -9,15 +9,14 @@ const API_KEY = '1b181f266b46431798019925168150a5';
 
 app.get('/api/live-news', async (req, res) => {
     try {
-        // 1. Der Premium-Filter für Hauptnachrichten
+        // 1. Der Premium-Filter für Hauptnachrichten (Bleibt streng!)
         const mainSuchbegriff = encodeURIComponent('politik OR wirtschaft OR breaking OR weltgeschehen');
         const premiumQuellen = 'tagesschau.de,zeit.de,spiegel.de,sueddeutsche.de,faz.net';
         const mainUrl = `https://newsapi.org/v2/everything?q=${mainSuchbegriff}&domains=${premiumQuellen}&language=de&sortBy=relevance&pageSize=30&apiKey=${API_KEY}`;
         
-        // 2. Der Premium-Filter für Regionale Nachrichten (NDR, LN, HL-live, Abendblatt)
+        // 2. Regionale Nachrichten (Gelockert: Suche nach den Städten auf allen deutschen Seiten)
         const regSuchbegriff = encodeURIComponent('Hamburg OR Lübeck');
-        const regQuellen = 'ndr.de,ln-online.de,hl-live.de,abendblatt.de';
-        const regionalUrl = `https://newsapi.org/v2/everything?q=${regSuchbegriff}&domains=${regQuellen}&language=de&sortBy=publishedAt&pageSize=20&apiKey=${API_KEY}`;
+        const regionalUrl = `https://newsapi.org/v2/everything?q=${regSuchbegriff}&language=de&sortBy=publishedAt&pageSize=30&apiKey=${API_KEY}`;
         
         // Server fragt beide Quellen gleichzeitig ab
         const [mainRes, regRes] = await Promise.all([fetch(mainUrl), fetch(regionalUrl)]);
