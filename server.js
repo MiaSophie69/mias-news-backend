@@ -16,23 +16,17 @@ app.get('/api/live-news', async (req, res) => {
         const regSuchbegriff = encodeURIComponent('Hamburg OR Lübeck OR Luebeck');
         const regionalUrl = `https://newsapi.org/v2/everything?q=${regSuchbegriff}&language=de&sortBy=publishedAt&pageSize=30&apiKey=${API_KEY}`;
         
-        // 3. Popkultur XL (Mit massig A-List-Promis, Newcomern, Events und Trend-Keywords!)
+        // 3. Popkultur & Gossip XL mit zusätzlichem Fangnetz für Musik & Charts allgemein
         const celebTags = [
+            'musik', 'pop', 'charts', 'album', 'gossip', 'singles',
             '"Lady Gaga"', '"Taylor Swift"', '"Beyonce"', '"Kardashian"', '"Rihanna"', 
             '"Ariana Grande"', '"Justin Bieber"', '"Dua Lipa"', '"Billie Eilish"', 
-            '"Sabrina Carpenter"', '"Olivia Rodrigo"', '"Selena Gomez"', '"Zendaya"', 
-            '"Kylie Jenner"', '"Kendall Jenner"', '"Timothee Chalamet"', '"Harry Styles"', 
-            '"Chappell Roan"', '"Charli XCX"', '"Tom Holland"', '"Sydney Sweeney"',
-            '"neues Album"', '"Grammy"', '"Met Gala"', '"Coachella"', '"Billboard"', 
-            '"Charts"', '"Welttournee"', '"Musikvideo"', '"Gossip"', '"Konzert"', 
-            '"Kino-Charts"', '"Streaming-Rekord"', '"K-Pop"', '"Netflix-Hit"'
+            '"Sabrina Carpenter"', '"Olivia Rodrigo"', '"Ethel Cain"', '"Lana Del Rey"'
         ];
         
         const celebSuchbegriff = encodeURIComponent('(' + celebTags.join(' OR ') + ')');
-        // Wir erhöhen die pageSize auf 60, damit auch richtig viele Schlagzeilen geladen werden!
-        const celebUrl = `https://newsapi.org/v2/everything?q=${celebSuchbegriff}&language=de&sortBy=publishedAt&pageSize=60&apiKey=${API_KEY}`;
+        const celebUrl = `https://newsapi.org/v2/everything?q=${celebSuchbegriff}&language=de&sortBy=publishedAt&pageSize=80&apiKey=${API_KEY}`;
 
-        // Alle drei Quellen abfragen
         const mainRes = await fetch(mainUrl);
         const mainData = await mainRes.json();
         
@@ -51,7 +45,7 @@ app.get('/api/live-news', async (req, res) => {
         // --- DAS SICHERHEITSNETZ ---
         const hatHamburg = alleArtikel.some(a => a.title && (a.title.includes('Hamburg') || (a.description && a.description.includes('Hamburg'))));
         const hatLuebeck = alleArtikel.some(a => a.title && (a.title.includes('Lübeck') || a.title.includes('Luebeck') || (a.description && (a.description.includes('Lübeck') || a.description.includes('Luebeck')))));
-        const hatGossip = alleArtikel.some(a => a.title && (a.title.toLowerCase().includes('album') || a.title.toLowerCase().includes('gaga') || a.title.toLowerCase().includes('swift') || a.title.toLowerCase().includes('charts')));
+        const hatGossip = alleArtikel.some(a => a.title && (a.title.toLowerCase().includes('album') || a.title.toLowerCase().includes('gaga') || a.title.toLowerCase().includes('pop') || a.title.toLowerCase().includes('charts')));
         
         if (!hatHamburg) {
             alleArtikel.push({
@@ -73,10 +67,10 @@ app.get('/api/live-news', async (req, res) => {
 
         if (!hatGossip) {
             alleArtikel.push({
-                title: "Lady Gaga kündigt überraschend neues Album an!",
-                description: "Die Pop-Ikone hat auf Instagram aus dem Nichts ihr neues Projekt angeteasert. Fans spekulieren über eine Stadion-Tour.",
-                url: "https://www.promiflash.de",
-                source: { name: "Pop News" }
+                title: "Ethel Cain teast neues Musikprojekt an",
+                description: "Die Indie-Pop-Ikone sorgt auf ihren Social-Media-Kanälen für Spekulationen über den Nachfolger von Preacher's Daughter.",
+                url: "https://www.bunte.de",
+                source: { name: "Pop Culture News" }
             });
         }
         
