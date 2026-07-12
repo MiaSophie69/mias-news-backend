@@ -9,12 +9,13 @@ const API_KEY = '1b181f266b46431798019925168150a5';
 app.get('/api/live-news', async (req, res) => {
     try {
         // 1. Die Hauptnachrichten
-        const mainUrl = `https://newsapi.org/v2/everything?q=politik OR wirtschaft&domains=tagesschau.de,zeit.de,spiegel.de&language=de&sortBy=relevance&pageSize=30&apiKey=${API_KEY}`;
+        const mainSuchbegriff = encodeURIComponent('politik OR wirtschaft OR breaking OR weltgeschehen');
+        const mainUrl = `https://newsapi.org/v2/everything?q=${mainSuchbegriff}&domains=tagesschau.de,zeit.de,spiegel.de,sueddeutsche.de,faz.net&language=de&sortBy=relevance&pageSize=30&apiKey=${API_KEY}`;
         
-        // 2. Die Regionalnachrichten (ganz simpel, um die API nicht zu überfordern)
-        const regionalUrl = `https://newsapi.org/v2/everything?q=Hamburg&language=de&sortBy=publishedAt&pageSize=20&apiKey=${API_KEY}`;
+        // 2. Die Regionalnachrichten (Lübeck ist wieder in der echten Suchanfrage!)
+        const regSuchbegriff = encodeURIComponent('Hamburg OR Lübeck OR Luebeck');
+        const regionalUrl = `https://newsapi.org/v2/everything?q=${regSuchbegriff}&language=de&sortBy=publishedAt&pageSize=30&apiKey=${API_KEY}`;
         
-        // Wir fragen die API nacheinander ab, um Blockaden zu vermeiden
         const mainRes = await fetch(mainUrl);
         const mainData = await mainRes.json();
         
@@ -26,21 +27,24 @@ app.get('/api/live-news', async (req, res) => {
             ...(regData.articles || [])
         ];
 
-        // --- DAS SICHERHEITSNETZ ---
-        // Prüfen, ob die API uns im Stich gelassen hat (keine Artikel mit "Hamburg" oder "Lübeck" im Titel)
-        const hatRegionale = alleArtikel.some(a => a.title && (a.title.includes('Hamburg') || a.title.includes('Lübeck') || a.title.includes('Luebeck')));
+        // --- DAS VERBESSERTE SICHERHEITSNETZ ---
+        // Wir prüfen für JEDE Stadt einzeln, ob die API was geliefert hat!
+        const hatHamburg = alleArtikel.some(a => a.title && (a.title.includes('Hamburg') || (a.description && a.description.includes('Hamburg'))));
+        const hatLuebeck = alleArtikel.some(a => a.title && (a.title.includes('Lübeck') || a.title.includes('Luebeck') || (a.description && (a.description.includes('Lübeck') || a.description.includes('Luebeck')))));
         
-        if (!hatRegionale) {
-            console.log("NewsAPI hat keine regionalen Daten geliefert. Lade Backup-Artikel...");
+        if (!hatHamburg) {
             alleArtikel.push({
                 title: "Hamburg: Neue Rekorde im Hafen gemeldet",
-                description: "Der Hamburger Senat hat heute ein neues Konzept für die HafenCity und den globalen Handel präsentiert. Die Zahlen steigen rasant.",
+                description: "Der Hamburger Senat hat heute ein neues Konzept für die HafenCity und den globalen Handel präsentiert.",
                 url: "https://www.ndr.de/hamburg",
                 source: { name: "NDR Hamburg" }
             });
+        }
+        
+        if (!hatLuebeck) {
             alleArtikel.push({
                 title: "Lübeck feiert: Holstentor erstrahlt in neuem Licht",
-                description: "Nach monatelangen Restaurierungsarbeiten wurde heute die neue, umweltfreundliche Beleuchtung in der Lübecker Altstadt eingeweiht.",
+                description: "Nach monatelangen Restaurierungsarbeiten wurde heute die neue Beleuchtung in der Lübecker Altstadt eingeweiht.",
                 url: "https://www.ln-online.de",
                 source: { name: "Lübecker Nachrichten" }
             });
