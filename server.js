@@ -8,7 +8,7 @@ const API_KEY = '1b181f266b46431798019925168150a5';
 
 app.get('/api/live-news', async (req, res) => {
     try {
-        const url = `https://newsapi.org/v2/top-headlines?country=de&apiKey=${API_KEY}`;
+        const url = `https://newsapi.org/v2/everything?q=nachrichten&language=de&sortBy=publishedAt&apiKey=${API_KEY}`;
         const apiAntwort = await fetch(url);
         const daten = await apiAntwort.json();
         res.json(daten);
