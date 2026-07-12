@@ -12,23 +12,31 @@ app.get('/api/live-news', async (req, res) => {
         const mainSuchbegriff = encodeURIComponent('politik OR wirtschaft OR breaking OR weltgeschehen');
         const mainUrl = `https://newsapi.org/v2/everything?q=${mainSuchbegriff}&domains=tagesschau.de,zeit.de,spiegel.de,sueddeutsche.de,faz.net&language=de&sortBy=relevance&pageSize=30&apiKey=${API_KEY}`;
         
-        // 2. Die Regionalnachrichten (Lübeck ist wieder in der echten Suchanfrage!)
+        // 2. Die Regionalnachrichten
         const regSuchbegriff = encodeURIComponent('Hamburg OR Lübeck OR Luebeck');
         const regionalUrl = `https://newsapi.org/v2/everything?q=${regSuchbegriff}&language=de&sortBy=publishedAt&pageSize=30&apiKey=${API_KEY}`;
         
+        // 3. NEU: Popkultur & Celebrity Gossip (Die Popcrave-Vibes!)
+        const celebSuchbegriff = encodeURIComponent('promi OR star OR hollywood OR influencer OR gossip OR sänger');
+        const celebUrl = `https://newsapi.org/v2/everything?q=${celebSuchbegriff}&domains=promiflash.de,vip.de,gala.de,bunte.de,bravo.de&language=de&sortBy=publishedAt&pageSize=30&apiKey=${API_KEY}`;
+
+        // Wir fragen jetzt alle drei Quellen gleichzeitig ab
         const mainRes = await fetch(mainUrl);
         const mainData = await mainRes.json();
         
         const regRes = await fetch(regionalUrl);
         const regData = await regRes.json();
+
+        const celebRes = await fetch(celebUrl);
+        const celebData = await celebRes.json();
         
         let alleArtikel = [
             ...(mainData.articles || []),
-            ...(regData.articles || [])
+            ...(regData.articles || []),
+            ...(celebData.articles || [])
         ];
 
-        // --- DAS VERBESSERTE SICHERHEITSNETZ ---
-        // Wir prüfen für JEDE Stadt einzeln, ob die API was geliefert hat!
+        // --- DAS VERBESSERTE SICHERHEITSNETZ (Bleibt erhalten) ---
         const hatHamburg = alleArtikel.some(a => a.title && (a.title.includes('Hamburg') || (a.description && a.description.includes('Hamburg'))));
         const hatLuebeck = alleArtikel.some(a => a.title && (a.title.includes('Lübeck') || a.title.includes('Luebeck') || (a.description && (a.description.includes('Lübeck') || a.description.includes('Luebeck')))));
         
