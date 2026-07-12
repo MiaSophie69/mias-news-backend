@@ -13,10 +13,11 @@ app.get('/api/live-news', async (req, res) => {
         const premiumQuellen = 'tagesschau.de,zeit.de,spiegel.de,sueddeutsche.de,faz.net';
         const mainUrl = `https://newsapi.org/v2/everything?q=${mainSuchbegriff}&domains=${premiumQuellen}&language=de&sortBy=relevance&pageSize=30&apiKey=${API_KEY}`;
         
-        // 2. Strenge Regionale Nachrichten (NUR deine Wunsch-Zeitungen!)
+        // 2. Regionale Nachrichten (Der Sweet-Spot: Strenge Zeitungen, aber Suche im ganzen Text!)
         const regSuchbegriff = encodeURIComponent('Hamburg OR Lübeck OR Luebeck');
         const regQuellen = 'ndr.de,abendblatt.de,ln-online.de,hl-live.de,mopo.de';
-        const regionalUrl = `https://newsapi.org/v2/everything?qInTitle=${regSuchbegriff}&domains=${regQuellen}&language=de&sortBy=publishedAt&pageSize=30&apiKey=${API_KEY}`;
+        // HIER GEÄNDERT: 'q=' statt 'qInTitle='
+        const regionalUrl = `https://newsapi.org/v2/everything?q=${regSuchbegriff}&domains=${regQuellen}&language=de&sortBy=publishedAt&pageSize=30&apiKey=${API_KEY}`;
         
         const [mainRes, regRes] = await Promise.all([fetch(mainUrl), fetch(regionalUrl)]);
         const mainData = await mainRes.json();
