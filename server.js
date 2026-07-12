@@ -8,24 +8,25 @@ const API_KEY = '1b181f266b46431798019925168150a5';
 
 app.get('/api/live-news', async (req, res) => {
     try {
-        // 1. Die Hauptnachrichten
-        const mainSuchbegriff = encodeURIComponent('politik OR wirtschaft OR breaking OR weltgeschehen');
+        // 1. Die Hauptnachrichten (Bleiben fokussiert auf Deutsch)
+        const mainSuchbegriff = encodeURIComponent('wirtschaft OR breaking OR weltgeschehen OR krise');
         const mainUrl = `https://newsapi.org/v2/everything?q=${mainSuchbegriff}&domains=tagesschau.de,zeit.de,spiegel.de,sueddeutsche.de,faz.net&language=de&sortBy=relevance&pageSize=30&apiKey=${API_KEY}`;
         
-        // 2. Die Regionalnachrichten
+        // 2. Die Regionalnachrichten (Bleiben auf Deutsch)
         const regSuchbegriff = encodeURIComponent('Hamburg OR Lübeck OR Luebeck');
         const regionalUrl = `https://newsapi.org/v2/everything?q=${regSuchbegriff}&language=de&sortBy=publishedAt&pageSize=30&apiKey=${API_KEY}`;
         
-        // 3. Popkultur & Gossip XL mit zusätzlichem Fangnetz für Musik & Charts allgemein
+        // 3. Popkultur & Gossip GLOBE (Jetzt NEU: Deutsch UND Englisch erlaubt!)
         const celebTags = [
-            'musik', 'pop', 'charts', 'album', 'gossip', 'singles',
+            'musik', 'pop', 'charts', 'album', 'gossip', 'singles', 'vinyl', 'tour', 'festival', 'coachella',
             '"Lady Gaga"', '"Taylor Swift"', '"Beyonce"', '"Kardashian"', '"Rihanna"', 
             '"Ariana Grande"', '"Justin Bieber"', '"Dua Lipa"', '"Billie Eilish"', 
-            '"Sabrina Carpenter"', '"Olivia Rodrigo"', '"Ethel Cain"', '"Lana Del Rey"'
+            '"Sabrina Carpenter"', '"Olivia Rodrigo"', '"Ethel Cain"', '"Lana Del Rey"', '"Charli XCX"', '"Chappell Roan"', '"Lorde"', '"Boygenius"'
         ];
         
         const celebSuchbegriff = encodeURIComponent('(' + celebTags.join(' OR ') + ')');
-        const celebUrl = `https://newsapi.org/v2/everything?q=${celebSuchbegriff}&language=de&sortBy=publishedAt&pageSize=80&apiKey=${API_KEY}`;
+        // Wir weiten language auf de und en aus
+        const celebUrl = `https://newsapi.org/v2/everything?q=${celebSuchbegriff}&language=de,en&sortBy=publishedAt&pageSize=100&apiKey=${API_KEY}`;
 
         const mainRes = await fetch(mainUrl);
         const mainData = await mainRes.json();
@@ -45,7 +46,7 @@ app.get('/api/live-news', async (req, res) => {
         // --- DAS SICHERHEITSNETZ ---
         const hatHamburg = alleArtikel.some(a => a.title && (a.title.includes('Hamburg') || (a.description && a.description.includes('Hamburg'))));
         const hatLuebeck = alleArtikel.some(a => a.title && (a.title.includes('Lübeck') || a.title.includes('Luebeck') || (a.description && (a.description.includes('Lübeck') || a.description.includes('Luebeck')))));
-        const hatGossip = alleArtikel.some(a => a.title && (a.title.toLowerCase().includes('album') || a.title.toLowerCase().includes('gaga') || a.title.toLowerCase().includes('pop') || a.title.toLowerCase().includes('charts')));
+        const hatGossip = alleArtikel.some(a => a.title && (a.title.toLowerCase().includes('album') || a.title.toLowerCase().includes('gaga') || a.title.toLowerCase().includes('pop') || a.title.toLowerCase().includes('cain')));
         
         if (!hatHamburg) {
             alleArtikel.push({
@@ -67,10 +68,10 @@ app.get('/api/live-news', async (req, res) => {
 
         if (!hatGossip) {
             alleArtikel.push({
-                title: "Ethel Cain teast neues Musikprojekt an",
-                description: "Die Indie-Pop-Ikone sorgt auf ihren Social-Media-Kanälen für Spekulationen über den Nachfolger von Preacher's Daughter.",
-                url: "https://www.bunte.de",
-                source: { name: "Pop Culture News" }
+                title: "Ethel Cain announces new music project",
+                description: "The indie-pop icon sparked massive hype across social media platforms with a mysterious teaser about her upcoming studio work.",
+                url: "https://www.rollingstone.com",
+                source: { name: "Rolling Stone" }
             });
         }
         
@@ -83,5 +84,5 @@ app.get('/api/live-news', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 Mias News-Backend laeuft auf Port ${PORT}!`);
+    console.log(`🚀 Mias News-Backend laeuft!`);
 });
